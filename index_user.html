@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Dashboard - Hệ Thống Tưới Cây Zigbee & ESP32</title>
+    <!-- Nhập thư viện Chart.js để vẽ biểu đồ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Nhập tệp CSS rời -->
+    <link rel="stylesheet" href="style_user.css">
+</head>
+<body>
+
+<div class="dashboard-container">
+    <!-- HEADER TRẠNG THÁI -->
+    <header>
+        <div>
+            <h2>Dashboard Tưới Cây Thông Minh</h2>
+            <small style="color: var(--text-sub);">Hệ thống ESP32 + Zigbee Mesh + Van Điện Từ</small>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <!-- Tín hiệu Zigbee -->
+            <span id="zigbeeBadge" class="status-pill pill-green">📶 Zigbee: Kết Nối (-68 dBm)</span>
+            <!-- Chế độ hoạt động -->
+            <span id="modeBadge" class="status-pill pill-blue">⚙️ Chế độ: TỰ ĐỘNG</span>
+            <!-- Trạng thái van -->
+            <span id="valveBadge" class="status-pill pill-red">🚰 Van: ĐANG ĐÓNG</span>
+        </div>
+    </header>
+
+    <div class="main-grid">
+        <!-- BẢNG ĐIỀU KHIỂN GIẢ LẬP -->
+        <div class="card">
+            <div class="card-title">Điều Khiển Thiết Bị & Giả Lập Dữ Liệu</div>
+
+            <div class="control-item">
+                <label>
+                    <span>Độ ẩm đất (Sensor Zigbee):</span>
+                    <strong id="soilTxt" style="color: var(--accent-blue);">45%</strong>
+                </label>
+                <input type="range" id="soilInput" min="0" max="100" value="45" oninput="app.setSoil(this.value)">
+            </div>
+
+            <div class="control-item">
+                <label>
+                    <span>Ngưỡng bật tưới tự động:</span>
+                    <strong id="threshTxt" style="color: var(--accent-amber);">35%</strong>
+                </label>
+                <input type="range" id="threshInput" min="10" max="80" value="35" oninput="app.setThreshold(this.value)">
+            </div>
+
+            <div class="control-item">
+                <label>
+                    <span>Chất lượng sóng Zigbee (RSSI):</span>
+                    <strong id="rssiTxt" style="color: var(--accent-green);">-68 dBm</strong>
+                </label>
+                <input type="range" id="rssiInput" min="-100" max="-30" value="-68" oninput="app.setRSSI(this.value)">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="app.toggleMode()">Đổi Chế Độ (Auto/Manual)</button>
+                <button id="manualValveBtn" class="btn btn-action" onclick="app.toggleManualValve()" disabled>Bật Van Thủ Công</button>
+            </div>
+        </div>
+
+        <!-- TRỰC QUAN HÓA CANVAS -->
+        <div class="card">
+            <div class="card-title">Trực Quan Hóa Hệ Thống Mô Phỏng</div>
+            <canvas id="simCanvas" width="550" height="260"></canvas>
+        </div>
+    </div>
+
+    <!-- BIỂU ĐỒ & NHẬT KÝ LOG -->
+    <div class="main-grid">
+        <div class="card">
+            <div class="card-title">Theo Dõi Độ Ẩm Đất Theo Thời Gian Real-time</div>
+            <canvas id="chartCanvas" height="150"></canvas>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Nhật Ký Hoạt Động Hệ Thống (System Logs)</div>
+            <div id="logBox" class="log-box"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Nhập tệp JavaScript rời -->
+<script src="script_user.js"></script>
+</body>
+</html>

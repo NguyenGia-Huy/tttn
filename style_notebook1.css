@@ -1,0 +1,40 @@
+body {
+    background-color: #0f172a !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    background-color: #1e293b !important;
+    border-radius: 10px;
+}
+
+/* Định dạng riêng cho Card chứa Cảm Biến Mưa */
+.rain-card-container {
+    position: relative;
+    overflow: hidden; /* Cắt phần thừa của giọt mưa tràn ra ngoài card */
+}
+
+/* Canvas mưa nằm gọn trong Card */
+#rainCardCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Lớp màu trạng thái độ ẩm */
+.status-normal { background-color: #198754 !important; }
+.status-warning { background-color: #ffc107 !important; color: #000 !important; }
+.status-critical { background-color: #dc3545 !important; }
+
+/* Custom Thanh Trượt */
+.form-range::-webkit-slider-thumb {
+    background: #0dcaf0;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1e293b; }
+::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }

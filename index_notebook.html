@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Dashboard - Tưới Cây Zigbee 3.0 & ESP32-C6</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style_notebook.css">
+</head>
+<body class="bg-dark text-light">
+
+<div class="container py-4">
+    <!-- HEADER BAR -->
+    <header class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom border-secondary">
+        <div>
+            <h1 class="h3 mb-0 text-info">Hệ Thống Tưới Cây ESP32-C6</h1>
+            <small class="text-muted">Giao thức Zigbee 3.0 Mesh | Solenoid Valve 12V</small>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span id="wifiBadge" class="badge bg-secondary">Wi-Fi: -- dBm</span>
+            <span id="zigbeeBadge" class="badge bg-secondary">Zigbee LQI: --</span>
+            <div class="form-check form-switch ms-3">
+                <input class="form-check-input" type="checkbox" id="modeToggle" onchange="app.toggleMode()">
+                <label class="form-check-label fw-bold" for="modeToggle" id="modeLabel">AUTO</label>
+            </div>
+        </div>
+    </header>
+
+    <!-- MONITORING CARDS -->
+    <div class="row g-3 mb-4">
+        <!-- Card Độ Ẩm Đất -->
+        <div class="col-md-4">
+            <div class="card bg-secondary text-white h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-light">Độ Ẩm Đất hiện tại</h6>
+                    <div class="display-4 fw-bold my-2" id="moistureValue">0%</div>
+                    <div id="moistureStatus" class="badge bg-success">TRẠNG THÁI TỐI ƯU</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Trạng Thái Cảm Biến Mưa -->
+        <div class="col-md-4">
+            <div class="card bg-secondary text-white h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-light">Cảm Biến Mưa</h6>
+                    <div class="display-6 fw-bold my-3" id="rainStatus">☀️ Không Mưa</div>
+                    <small class="text-warning" id="rainLockNotice" style="display: none;">⚠️ Khóa tưới do có mưa</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Trạng Thái Van Điện Từ -->
+        <div class="col-md-4">
+            <div class="card bg-secondary text-white h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-light">Van Điện Từ (12V)</h6>
+                    <div class="display-6 fw-bold my-2" id="valveStatusText">NGỪNG TƯỚI</div>
+                    <button id="manualBtn" class="btn btn-primary mt-2" onclick="app.toggleManualValve()" disabled>Bật Van Thủ Công</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRAPH & SETTINGS -->
+    <div class="row g-3 mb-4">
+        <!-- Đồ thị biến thiên độ ẩm -->
+        <div class="col-lg-8">
+            <div class="card bg-secondary text-white border-0 shadow-sm p-3">
+                <h5 class="card-title text-info mb-3">Đồ Thị Biến Thiên Độ Ẩm Theo Thời Gian</h5>
+                <canvas id="moistureChart" height="120"></canvas>
+            </div>
+        </div>
+
+        <!-- Cấu hình ngưỡng kép -->
+        <div class="col-lg-4">
+            <div class="card bg-secondary text-white border-0 shadow-sm p-3 h-100">
+                <h5 class="card-title text-info mb-3">Cài Đặt Ngưỡng Tưới (%)</h5>
+                <div class="mb-3">
+                    <label for="threshLow" class="form-label">Ngưỡng Bật Tưới (<): <strong id="threshLowVal" class="text-warning">30%</strong></label>
+                    <input type="range" class="form-range" id="threshLow" min="10" max="50" value="30" oninput="app.updateThresholds()">
+                </div>
+                <div class="mb-3">
+                    <label for="threshHigh" class="form-label">Ngưỡng Ngắt Tưới (>=): <strong id="threshHighVal" class="text-success">70%</strong></label>
+                    <input type="range" class="form-range" id="threshHigh" min="50" max="90" value="70" oninput="app.updateThresholds()">
+                </div>
+                <div class="mb-3">
+                    <label for="simRain" class="form-label">Giả Lập Cảm Biến Mưa:</label>
+                    <select id="simRain" class="form-select bg-dark text-light border-secondary" onchange="app.setRainSimulation(this.value)">
+                        <option value="0">☀️ Không Mưa</option>
+                        <option value="1">🌧️ Đang Có Mưa</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SYSTEM LOGS & EXPORT CSV -->
+    <div class="card bg-secondary text-white border-0 shadow-sm p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title text-info mb-0">Nhật Ký Vận Hành Hệ Thống</h5>
+            <button class="btn btn-outline-info btn-sm" onclick="app.exportCSV()">📥 Xuất File CSV</button>
+        </div>
+        <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+            <table class="table table-dark table-striped table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Thời Gian</th>
+                        <th>Độ Ẩm (%)</th>
+                        <th>Trạng Thái Mưa</th>
+                        <th>Chế Độ</th>
+                        <th>Trạng Thái Van</th>
+                    </tr>
+                </thead>
+                <tbody id="logTableBody">
+                    <!-- Dữ liệu log sẽ chèn tại đây -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="script_notebook.js"></script>
+</body>
+</html>

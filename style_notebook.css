@@ -1,0 +1,36 @@
+/* Tùy chỉnh màu sắc và trạng thái theo tài liệu kỹ thuật */
+body {
+    background-color: #0f172a !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    background-color: #1e293b !important;
+    border-radius: 10px;
+}
+
+/* Các trạng thái độ ẩm */
+.status-normal {
+    background-color: #198754 !important; /* Xanh lá: 40% - 80% */
+}
+
+.status-warning {
+    background-color: #ffc107 !important; /* Vàng: < 30% */
+    color: #000 !important;
+}
+
+.status-critical {
+    background-color: #dc3545 !important; /* Đỏ: < 15% */
+}
+
+/* Định dạng thanh cuộn cho bảng log */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+::-webkit-scrollbar-thumb {
+    background: #3b82f6;
+    border-radius: 3px;
+}
