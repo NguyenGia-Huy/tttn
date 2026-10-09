@@ -1,3 +1,9 @@
+// Cấu hình WebSocket kết nối đến Mosquitto local
+const brokerHost = "192.168.1.9";
+const brokerPort = 9001; // Cổng WebSocket của Mosquitto
+
+const client = new Paho.MQTT.Client(brokerHost, Number(brokerPort), "web_dashboard_" + Date.now());
+
 /**
  * Lớp tạo hiệu ứng hạt mưa rơi giới hạn trong thẻ Card
  */
