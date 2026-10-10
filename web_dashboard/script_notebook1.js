@@ -146,7 +146,7 @@ class DashboardApp {
     // Trường hợp TẮT VAN & KHÔNG MƯA -> Đất tự khô (-1% mỗi 2 giây)
     else if (this.data.valve_status === 0 && this.data.rain === 0) {
       if (this.data.moisture > 0) {
-        this.data.moisture = Math.max(0, this.data.moisture - 1);
+        this.data.moisture = Math.max(0, this.data.moisture - 2);
         hasChanged = true;
       }
     }
@@ -368,7 +368,7 @@ const app = new DashboardApp();
 // =================================================================
 
 // Tên miền lấy từ ảnh Terminal Cloudflare của bạn
-const cloudflareDomain = "players-touch-medicare-carey.trycloudflare.com";
+const cloudflareDomain = "https://tract-bloggers-paths-linux.trycloudflare.com";
 
 const client = new Paho.MQTT.Client(
   cloudflareDomain,
