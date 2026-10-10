@@ -368,7 +368,8 @@ const app = new DashboardApp();
 // =================================================================
 
 // Tên miền lấy từ ảnh Terminal Cloudflare của bạn
-const cloudflareDomain = "https://tract-bloggers-paths-linux.trycloudflare.com";
+const cloudflareDomain =
+  "https://tract-bloggers-paths-linux.trycloudflare.com/";
 
 const client = new Paho.MQTT.Client(
   cloudflareDomain,

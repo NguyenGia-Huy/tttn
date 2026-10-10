@@ -82,6 +82,20 @@ Mở 2 cửa sổ Terminal trên Ubuntu để thử nghiệm:
 Ngay khi gõ lệnh ở Terminal 2, dữ liệu JSON sẽ lập tức xuất hiện ở Terminal 1.
 Step 4: Tài Liệu Tích Hợp Vào Mã Nguồn
 
-# Mã Flutter App (lib/main.dart): Kết nối đến 192.168.1.9 qua cổng 1883 (giao thức TCP).
+Mã Flutter App (lib/main.dart): Kết nối đến 192.168.1.9 qua cổng 1883 (giao thức TCP).
+Mã Web Dashboard (script_notebook1.js): Kết nối đến ws://192.168.1.9:9001/mqtt (giao thức WebSocket).
 
-# Mã Web Dashboard (script_notebook1.js): Kết nối đến ws://192.168.1.9:9001/mqtt (giao thức WebSocket).
+1. Trình Bày Mã Lệnh & Hướng Dẫn Triển Khai1. Cài đặt cloudflared trên UbuntuBạn sao chép và dán lần lượt từng dòng lệnh sau vào Terminal (huy@HUY-HOME:~$) rồi nhấn Enter:
+
+# Dòng 1: Tải gói cài đặt cloudflared mới nhất cho Ubuntu
+
+wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+
+# Dòng 2: Tiến hành cài đặt gói vừa tải vào hệ thống (Nhập mật khẩu Ubuntu nếu được hỏi)
+
+sudo dpkg -i cloudflared-linux-amd64.deb
+
+2. Khởi tạo đường hầm kết nối MosquittoSau khi cài đặt xong, bạn gõ lệnh tạo Tunnel:
+   cloudflared tunnel --url http://localhost:9001
+
+📌 Kết quả trả về: Terminal sẽ chạy và hiển thị một đoạn văn bản. Bạn hãy tìm dòng có cấu trúc dạng:[https://xxxx-xxxx-xxxx.trycloudflare.com](https://xxxx-xxxx-xxxx.trycloudflare.com)(Hãy copy chuỗi tên miền xxxx-xxxx-xxxx.trycloudflare.com này và giữ cửa sổ Terminal luôn mở ngầm).
