@@ -368,7 +368,7 @@ const app = new DashboardApp();
 // =================================================================
 
 // ĐÃ SỬA: Loại bỏ "https://" ở đầu, chỉ giữ tên miền
-const cloudflareDomain = "lid-golden-enter-improvements.trycloudflare.com";
+const cloudflareDomain = "connections-forge-mate-titled.trycloudflare.com";
 
 const client = new Paho.MQTT.Client(
   cloudflareDomain,
