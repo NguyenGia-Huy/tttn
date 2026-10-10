@@ -368,8 +368,7 @@ const app = new DashboardApp();
 // =================================================================
 
 // ĐÃ SỬA: Loại bỏ "https://" ở đầu, chỉ giữ tên miền
-const cloudflareDomain =
-  "yet-turns-opportunities-accessories.trycloudflare.com";
+const cloudflareDomain = "meat-can-wizard-happened.trycloudflare.com";
 
 const client = new Paho.MQTT.Client(
   cloudflareDomain,
