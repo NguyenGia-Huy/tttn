@@ -143,7 +143,7 @@ class DashboardApp {
         hasChanged = true;
       }
     }
-    // Trường hợp TẮT VAN & KHÔNG MƯA -> Đất tự khô (-1% mỗi 2 giây)
+    // Trường hợp TẮT VAN & KHÔNG MƯA -> Đất tự khô (-2% mỗi 2 giây)
     else if (this.data.valve_status === 0 && this.data.rain === 0) {
       if (this.data.moisture > 0) {
         this.data.moisture = Math.max(0, this.data.moisture - 2);
@@ -367,9 +367,8 @@ const app = new DashboardApp();
 // 3. KẾT NỐI WSS QUA CLOUDFLARE TUNNEL DÀNH CHO GITHUB PAGES
 // =================================================================
 
-// Tên miền lấy từ ảnh Terminal Cloudflare của bạn
-const cloudflareDomain =
-  "https://lid-golden-enter-improvements.trycloudflare.com";
+// ĐÃ SỬA: Loại bỏ "https://" ở đầu, chỉ giữ tên miền
+const cloudflareDomain = "lid-golden-enter-improvements.trycloudflare.com";
 
 const client = new Paho.MQTT.Client(
   cloudflareDomain,
