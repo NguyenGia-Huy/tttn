@@ -46,7 +46,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool isConnected = false;
 
   // 2. Địa chỉ IP máy Mosquitto Broker riêng trên Ubuntu
-  final String localMosquittoIp = '192.168.1.9';
+  final String localMosquittoIp = '172.172.15.33';
 
   @override
   void initState() {

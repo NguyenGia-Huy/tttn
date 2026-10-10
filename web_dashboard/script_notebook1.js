@@ -85,7 +85,7 @@ class DashboardApp {
     this.rainEffect = new CardRainEffect("rainCardCanvas");
     this.initChart();
 
-    // Tiến trình tự động cập nhật độ ẩm theo thời gian thực (chạy mỗi 2 giây)
+    // Vòng lặp mô phỏng tăng/giảm độ ẩm tự động theo thời gian (mỗi 2 giây)
     setInterval(() => this.simulationTick(), 2000);
   }
 
@@ -120,11 +120,10 @@ class DashboardApp {
     }
   }
 
-  // TIẾN TRÌNH MÔ PHỎNG TĂNG ĐỘ ẨM KHI TƯỚI / MƯA VÀ GIẢM ĐỘ ẨM KHI ĐẤT KHÔ
   simulationTick() {
     let hasChanged = false;
 
-    // 1. TRƯỜNG HỢP CÓ MƯA: Đất tăng độ ẩm (+3%) & Tự động khóa van
+    // Trường hợp CÓ MƯA -> Tăng 3% độ ẩm & Tự động ngắt van
     if (this.data.rain === 1) {
       if (this.data.moisture < 100) {
         this.data.moisture = Math.min(100, this.data.moisture + 3);
@@ -137,44 +136,37 @@ class DashboardApp {
         hasChanged = true;
       }
     }
-    // 2. TRƯỜNG HỢP ĐANG TƯỚI (VAN ON): Đất tăng độ ẩm (+2%)
+    // Trường hợp ĐANG TƯỚI -> Tăng 2% độ ẩm
     else if (this.data.valve_status === 1) {
       if (this.data.moisture < 100) {
         this.data.moisture = Math.min(100, this.data.moisture + 2);
         hasChanged = true;
       }
     }
-    // 3. TRƯỜNG HỢP KHÔNG TƯỚI (VAN OFF) & KHÔNG MƯA: Đất tự khô (-1% mỗi 2 giây)
+    // Trường hợp TẮT VAN & KHÔNG MƯA -> Đất tự khô (-1% mỗi 2 giây)
     else if (this.data.valve_status === 0 && this.data.rain === 0) {
       if (this.data.moisture > 0) {
-        this.data.moisture = Math.max(0, this.data.moisture - 2);
+        this.data.moisture = Math.max(0, this.data.moisture - 1);
         hasChanged = true;
       }
     }
 
-    // 4. CHỈ KIỂM TRA NGƯỠNG TỰ ĐỘNG KHI Ở CHẾ ĐỘ "AUTO"
+    // Logic kiểm tra ngưỡng tự động trong chế độ AUTO
     if (this.data.mode === "AUTO" && this.data.rain === 0) {
-      // Đạt ngưỡng trên -> Tắt van
       if (
         this.data.moisture >= this.data.threshold_high &&
         this.data.valve_status === 1
       ) {
         this.data.valve_status = 0;
-        this.addLog(
-          `AUTO: Đạt ngưỡng ngắt (${this.data.moisture}% >= ${this.data.threshold_high}%) -> TẮT VAN`,
-        );
+        this.addLog(`AUTO: Đạt ngưỡng ngắt -> TẮT VAN`);
         sendWebCommand("valve", 0);
         hasChanged = true;
-      }
-      // Dưới ngưỡng dưới -> Bật van
-      else if (
+      } else if (
         this.data.moisture < this.data.threshold_low &&
         this.data.valve_status === 0
       ) {
         this.data.valve_status = 1;
-        this.addLog(
-          `AUTO: Đạt ngưỡng bật (${this.data.moisture}% < ${this.data.threshold_low}%) -> BẬT VAN`,
-        );
+        this.addLog(`AUTO: Đạt ngưỡng bật -> BẬT VAN`);
         sendWebCommand("valve", 1);
         hasChanged = true;
       }
@@ -183,8 +175,6 @@ class DashboardApp {
     if (hasChanged) {
       this.updateUI();
       this.updateChart();
-
-      // Phát tín hiệu đồng bộ sang App Flutter trên điện thoại
       sendTelemetryUpdate({
         moisture: this.data.moisture,
         rain: this.data.rain,
@@ -374,14 +364,16 @@ class DashboardApp {
 const app = new DashboardApp();
 
 // =================================================================
-// 3. KẾT NỐI MOSQUITTO BROKER (WEBSOCKETS)
+// 3. KẾT NỐI WSS QUA CLOUDFLARE TUNNEL DÀNH CHO GITHUB PAGES
 // =================================================================
-const brokerHost = "192.168.1.9";
-const brokerPort = 9001;
+
+// Tên miền lấy từ ảnh Terminal Cloudflare của bạn
+const cloudflareDomain = "players-touch-medicare-carey.trycloudflare.com";
 
 const client = new Paho.MQTT.Client(
-  brokerHost,
-  Number(brokerPort),
+  cloudflareDomain,
+  443, // Cổng WSS mã hóa chuẩn
+  "/mqtt",
   "web_dashboard_" + Math.random().toString(16).substr(2, 8),
 );
 
@@ -393,10 +385,16 @@ client.onMessageArrived = function (message) {
 };
 
 client.connect({
-  timeout: 3,
+  timeout: 5,
+  useSSL: true, // Bắt buộc dùng SSL/WSS cho GitHub Pages (HTTPS)
   onSuccess: function () {
-    console.log("Web Dashboard đã kết nối thành công tới Mosquitto!");
+    console.log(
+      "Đã kết nối WSS thành công tới Mosquitto qua Cloudflare Tunnel!",
+    );
     client.subscribe("esp32c6/irrigation/telemetry", { qos: 0 });
+  },
+  onFailure: function (message) {
+    console.error("Kết nối WSS thất bại: " + message.errorMessage);
   },
 });
 
